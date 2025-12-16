@@ -3,16 +3,22 @@
 """
 Simplified Internet2 Topology Emulation using Canonical Names (sX, hX).
 
+Note:
+This topology is a simplified abstraction of the Internet2 backbone.
+Exact geographical distances and node degrees were adapted to ensure
+feasibility within the Mininet environment while preserving structural
+and functional characteristics for SDN performance evaluation.
+
 This script manually defines a custom topology mimicking the structure of the 
-Internet2 research network backbone, using 6 numerical switches (s1-s6) as nodes. 
-One host (h1-h6) is explicitly attached to every switch node.
+Internet2 research network backbone, using 10 numerical switches (s1-s10) as nodes. 
+One host (h1-h10) is explicitly attached to every switch node.
 """
 
 from mininet.topo import Topo
 from mininet.net import Mininet
 from mininet.log import setLogLevel, info
 from mininet.cli import CLI
-from mininet.node import OVSSwitch, RemoteController, OVSKernelSwitch
+from mininet.node import RemoteController, OVSKernelSwitch
 from mininet.link import TCLink
 
 class Internet2Topo( Topo ):
@@ -29,29 +35,34 @@ class Internet2Topo( Topo ):
     """
 
     def build( self ):
-        # --- 1. Add Switches (Canonical s1 to s10) ---
-        info( 'Adding 10 Canonical Switches (s1-s10)...\n' )
+        """
+        Build the topology:
+        1. Add switches
+        2. Add hosts
+        3. Connect hosts to switches
+        4. Create backbone links with realistic delay and bandwidth
+        """
+
+        # ------------------------------------------------------------------
+        # 1. Add Switches (canonical names are recommended by Mininet)
+        # ------------------------------------------------------------------
+        info('*** Adding switches (s1–s10)\n')
         
-        # Central Hub (s1: CHI)
-        s1 = self.addSwitch( 's1' ) 
-        
-        # East Coast (s2: NYC, s3: ATL)
-        s2 = self.addSwitch( 's2' )
-        s3 = self.addSwitch( 's3' )
+        s1 = self.addSwitch('s1')   # CHI
+        s2 = self.addSwitch('s2')   # NYC
+        s3 = self.addSwitch('s3')   # ATL
+        s4 = self.addSwitch('s4')   # DAL
+        s5 = self.addSwitch('s5')   # LAX
+        s6 = self.addSwitch('s6')   # SEA
+        s7 = self.addSwitch('s7')   # DEN
+        s8 = self.addSwitch('s8')   # MIA
+        s9 = self.addSwitch('s9')   # SJO
+        s10 = self.addSwitch('s10') # WAS
 
-        # South/West (s4: DAL, s5: LAX, s6: SEA)
-        s4 = self.addSwitch( 's4' )
-        s5 = self.addSwitch( 's5' )
-        s6 = self.addSwitch( 's6' )
-
-        s7 = self.addSwitch( 's7' ) # DEN
-        s8 = self.addSwitch( 's8' ) # MIA
-        s9 = self.addSwitch( 's9' ) # SJO
-        s10 = self.addSwitch( 's10' ) # WAS
-
-        # --- 2. Add Hosts (One Host per Switch, h1 to h10) ---
-        info( 'Adding 10 Hosts (h1-h10)...\n' )
-        # Using hX for host names and sequential IPs (10.0.0.1 to 10.0.0.6)
+        # ------------------------------------------------------------------
+        # 2. Add Hosts (one host per switch)
+        # ------------------------------------------------------------------
+        info('*** Adding hosts (h1–h10)\n')
 
         h1 = self.addHost( 'h1', ip='10.0.0.1/24' )
         h2 = self.addHost( 'h2', ip='10.0.0.2/24' )
@@ -64,10 +75,11 @@ class Internet2Topo( Topo ):
         h9 = self.addHost( 'h9', ip='10.0.0.9/24' )
         h10 = self.addHost( 'h10', ip='10.0.0.10/24' )
 
-        # --- 3. Add Links (Connections) ---
+        # ------------------------------------------------------------------
+        # 3. Host-to-Switch Access Links
+        # ------------------------------------------------------------------
+        info('*** Adding host-to-switch access links\n')
 
-        # Hosts <-> Switches Connections (Access Links)
-        info( 'Adding Host-Switch Access Links...\n' )
         self.addLink( h1, s1 )
         self.addLink( h2, s2 )
         self.addLink( h3, s3 )
@@ -79,60 +91,67 @@ class Internet2Topo( Topo ):
         self.addLink( h9, s9 )
         self.addLink( h10, s10 )
 
-        # Switches <-> Switches Connections (Backbone Links - based on Internet2 structure)
-        info( 'Adding Inter-Switch Backbone Links (Mesh-like)...\n' )
+        # ------------------------------------------------------------------
+        # 4. Switch-to-Switch Backbone Links
+        # TCLink is used to emulate realistic WAN conditions
+        # ------------------------------------------------------------------
+        info('*** Adding inter-switch backbone links\n')
         
-        # Central Hub (s1) connections
-        self.addLink( s1, s2, delay='10ms', bw=1000 ) # CHI <-> NYC
-        self.addLink( s2, s3, delay='5ms', bw=1000 ) # CHI <-> ATL
-        self.addLink( s3, s4, delay='20ms', bw=1000 ) # CHI <-> DAL
-        
-        # West and South connections
-        self.addLink( s4, s5, delay='15ms', bw=1000 ) # DAL <-> LAX
-        self.addLink( s5, s6, delay='25ms', bw=1000 ) # LAX <-> SEA
-
-        self.addLink( s6, s7, delay='10ms', bw=1000 ) # LAX <-> SEA
-        self.addLink( s7, s8, delay='10ms', bw=1000 ) # LAX <-> SEA
-        self.addLink( s8, s9, delay='10ms', bw=1000 ) # LAX <-> SEA
-        self.addLink( s9, s10, delay='10ms', bw=1000 ) # LAX <-> SEA
+        # s1 acts as a logical central node, but the topology has side links
+        self.addLink(s1, s2, delay='10ms', bw=1000)   # CHI <-> NYC
+        self.addLink(s2, s3, delay='5ms', bw=1000)    # NYC <-> ATL
+        self.addLink(s3, s4, delay='20ms', bw=1000)   # ATL <-> DAL
+        self.addLink(s4, s5, delay='15ms', bw=1000)   # DAL <-> LAX
+        self.addLink(s5, s6, delay='25ms', bw=1000)   # LAX <-> SEA
+        self.addLink(s6, s7, delay='10ms', bw=1000)   # SEA <-> DEN
+        self.addLink(s7, s8, delay='10ms', bw=1000)   # DEN <-> MIA
+        self.addLink(s8, s9, delay='10ms', bw=1000)   # MIA <-> SJO
+        self.addLink(s9, s10, delay='10ms', bw=1000)  # SJO <-> WAS
 
         
 def runInternet2Topo():
-    """Creates the network and starts the Mininet CLI."""
-    
-    # Set the logging level
-    setLogLevel( 'info' )
+    """
+    Instantiate the topology, connect it to a remote SDN controller,
+    and start the Mininet CLI.
+    """
 
-    # --- 1. Configurar o Controlador Remoto (C0) ---
-    # Assumimos que o controlador está rodando em 127.0.0.1 (localhost) na porta 6653 (padrão OpenFlow)
-    info( '*** Configurando Controlador Remoto (127.0.0.1:6653)...\n' )
-    remote_controller = RemoteController( 
-        'c0', 
-        ip='127.0.0.1', 
-        port=6653 
+    # Set Mininet logging level
+    setLogLevel('info')
+
+    # --------------------------------------------------------------
+    # Configure Remote SDN Controller
+    # The controller is assumed to be running locally (Ryu)
+    # Default OpenFlow port: 6653
+    # --------------------------------------------------------------
+    info('*** Configuring remote SDN controller (127.0.0.1:6653)\n')
+
+    remote_controller = RemoteController(
+        name='c0',
+        ip='127.0.0.1',
+        port=6653
     )
 
-    # Create the topology
+    # Create topology instance
     topo = Internet2Topo()
 
-    # Initialize the network using the defined topology.
-    # OVSSwitch works reliably with canonical names (sX).
-    net = Mininet( topo=topo, 
-                   switch=OVSKernelSwitch, 
-                   controller=remote_controller,
-                   link=TCLink
-                     )
+    # Initialize Mininet
+    net = Mininet(
+        topo=topo,
+        switch=OVSKernelSwitch,
+        controller=remote_controller,
+        link=TCLink
+    )
 
     # Start the network
     net.start()
 
-    # Open the Command Line Interface (CLI) for interaction
-    info( '*** Opening Mininet CLI. Type "exit" to quit.\n' )
-    CLI( net )
+    # Open Mininet CLI
+    info('*** Starting Mininet CLI (type "exit" to stop the network)\n')
+    CLI(net)
 
-    # Stop the network when the CLI is closed
+    # Stop the network after CLI exits
     net.stop()
 
 if __name__ == '__main__':
-    # This ensures the runInternet2Topo() function is executed when the script is called
+    # Entry point of the script
     runInternet2Topo()
