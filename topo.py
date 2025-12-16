@@ -98,15 +98,15 @@ class Internet2Topo( Topo ):
         info('*** Adding inter-switch backbone links\n')
         
         # s1 acts as a logical central node, but the topology has side links
-        self.addLink(s1, s2, delay='10ms', bw=1000)   # CHI <-> NYC
-        self.addLink(s2, s3, delay='5ms', bw=1000)    # NYC <-> ATL
-        self.addLink(s3, s4, delay='20ms', bw=1000)   # ATL <-> DAL
-        self.addLink(s4, s5, delay='15ms', bw=1000)   # DAL <-> LAX
-        self.addLink(s5, s6, delay='25ms', bw=1000)   # LAX <-> SEA
-        self.addLink(s6, s7, delay='10ms', bw=1000)   # SEA <-> DEN
-        self.addLink(s7, s8, delay='10ms', bw=1000)   # DEN <-> MIA
-        self.addLink(s8, s9, delay='10ms', bw=1000)   # MIA <-> SJO
-        self.addLink(s9, s10, delay='10ms', bw=1000)  # SJO <-> WAS
+        self.addLink(s1, s2, delay='8ms',  bw=1000)   # CHI <-> NYC
+        self.addLink(s2, s3, delay='6ms',  bw=1000)   # NYC <-> ATL
+        self.addLink(s3, s4, delay='12ms', bw=1000)   # ATL <-> DAL
+        self.addLink(s4, s5, delay='18ms', bw=1000)   # DAL <-> LAX
+        self.addLink(s5, s6, delay='28ms', bw=1000)   # LAX <-> SEA
+        self.addLink(s6, s7, delay='15ms', bw=1000)   # SEA <-> DEN
+        self.addLink(s7, s8, delay='20ms', bw=1000)   # DEN <-> MIA
+        self.addLink(s8, s9, delay='35ms', bw=1000)   # MIA <-> SJO
+        self.addLink(s9, s10, delay='12ms', bw=1000)  # SJO <-> WAS
 
         
 def runInternet2Topo():
